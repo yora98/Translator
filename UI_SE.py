@@ -16,6 +16,7 @@ from tkinter.filedialog import askopenfilename
 from Converter import Converter
 from TextToImage import TextToImage
 from translate import Translate
+from docx import DocReader
 
 try:
     from Tkinter import *
@@ -401,9 +402,14 @@ class New_Toplevel_1:
                         detectedLang = obj2.detectLang()
                         self.progress.stop()
                         self.progress.grid_forget()
+                    elif(file_extension==".odt" or file_extension=="docx"):
+                        obj=DocReader(self.file_path,filename)
+                        v=obj.extract()
+                        obj2 = Translate(v)
+                        detectedLang = obj2.detectLang()
+                        self.progress.stop()
+                        self.progress.grid_forget()
 
-
-                    #if image
                     else:
                         obj = Converter(temp, temp2)
                         v = obj.execute()
