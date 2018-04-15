@@ -380,62 +380,68 @@ class New_Toplevel_1:
         self.imgTxtScrolled.delete("1.0", END)
         self.file_path = askopenfilename(initialdir="home/", title="Choose Image File", filetypes=(("JPEG files", "*.jpg *.jpeg"),("PNG files", "*.png"),("PDF Files","*.pdf")))
         if self.file_path:
-            try:
-                self.progress = ttk.Progressbar(self.extractTextTPane, orient=HORIZONTAL, length=100, mode='indeterminate')
+            statinfo = os.stat(self.file_path)
+            size = statinfo.st_size
+            if size < 1024 * 1024:
+                try:
+                    self.progress = ttk.Progressbar(self.extractTextTPane, orient=HORIZONTAL, length=100, mode='indeterminate')
 
-                def parseImage():
-                    self.progress.grid(row=1, column=0)
-                    self.progress.start()
-                    time.sleep(5)
+                    def parseImage():
+                        self.progress.grid(row=1, column=0)
+                        self.progress.start()
+                        time.sleep(5)
 
-                    temp = os.path.basename(self.file_path)
-                    temp2 = os.path.dirname(self.file_path)
-                    filename, file_extension = os.path.splitext(self.file_path)
-                    print(file_extension)
-                    #if pdf
-
-                    if(file_extension==".pdf"):
+                        temp = os.path.basename(self.file_path)
+                        temp2 = os.path.dirname(self.file_path)
+                        filename, file_extension = os.path.splitext(self.file_path)
                         print(file_extension)
-                        pdfread=Pdfread(self.file_path,filename)
-                        v=pdfread.extract()
-                        obj2 = Translate(v)
-                        detectedLang = obj2.detectLang()
-                        self.progress.stop()
-                        self.progress.grid_forget()
-                    elif(file_extension==".odt" or file_extension=="docx"):
-                        obj=DocReader(self.file_path,filename)
-                        v=obj.extract()
-                        obj2 = Translate(v)
-                        detectedLang = obj2.detectLang()
-                        self.progress.stop()
-                        self.progress.grid_forget()
 
-                    else:
-                        obj = Converter(temp, temp2)
-                        v = obj.execute()
-                        obj2 = Translate(v)
-                        detectedLang = obj2.detectLang()
-                        self.progress.stop()
-                        self.progress.grid_forget()
+                        # if pdf
+                        if(file_extension==".pdf"):
+                            print(file_extension)
+                            pdfread=Pdfread(self.file_path,filename)
+                            v=pdfread.extract()
+                            obj2 = Translate(v)
+                            detectedLang = obj2.detectLang()
+                            self.progress.stop()
+                            self.progress.grid_forget()
+                        elif(file_extension==".odt" or file_extension=="docx"):
+                            obj=DocReader(self.file_path,filename)
+                            v=obj.extract()
+                            obj2 = Translate(v)
+                            detectedLang = obj2.detectLang()
+                            self.progress.stop()
+                            self.progress.grid_forget()
 
-
-                    if not v.isspace():
-                        self.setTempText(v)
-                        self.load_desc()
-                        self.load_detect_lang(detectedLang)
-                    else:
-                        tkinter.messagebox.showerror("OOPS!", "No Text Found!!\n")
-                    self.browseTButton['state'] = 'normal'
+                        else:
+                            obj = Converter(temp, temp2)
+                            v = obj.execute()
+                            obj2 = Translate(v)
+                            detectedLang = obj2.detectLang()
+                            self.progress.stop()
+                            self.progress.grid_forget()
 
 
+                        if not v.isspace():
+                            self.setTempText(v)
+                            self.load_desc()
+                            self.load_detect_lang(detectedLang)
+                        else:
+                            tkinter.messagebox.showerror("OOPS!", "No Text Found!!\n")
+                        self.browseTButton['state'] = 'normal'
 
-                self.browseTButton['state'] = 'disabled'
-                threading.Thread(target=parseImage).start()
 
-                self.pathText.insert('1.0', self.file_path)
 
-            except:
-                tkinter.messagebox.showerror("Open Source File", "Failed to open file\n'%s'" % self.file_path)
+                    self.browseTButton['state'] = 'disabled'
+                    threading.Thread(target=parseImage).start()
+
+                    self.pathText.insert('1.0', self.file_path)
+
+                except:
+                    tkinter.messagebox.showerror("Open Source File", "Failed to open file\n'%s'" % self.file_path)
+
+            else:
+                tkinter.messagebox.showerror("File Size Exceeded", "Choose a file with size < 1MB !!\n")
         else:
             tkinter.messagebox.showerror("Open Source File", "Choose a file first!!\n")
 

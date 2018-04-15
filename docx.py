@@ -7,7 +7,6 @@ class DocReader(object):
         self.file_name=file_nam
         self.file_path=path
 
-
     def extract(self):
         f = open(self.file_path, 'r')
         x=f.read()
